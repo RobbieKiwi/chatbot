@@ -1,0 +1,95 @@
+[project]
+name = "chatbot"
+version = "0.0.0"
+description = "An repository for doing ai stuff"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.13.4",
+    "sqlalchemy>=2.0.51",
+    "sqlmodel>=0.0.39",
+    "tzdata>=2025.2",
+]
+
+[dependency-groups]
+dev = [
+    "import-linter>=2.3",
+    "pytest>=8.0.0",
+    "ruff>=0.13.0",
+    "ty>=0.0.1a20",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["memorylayers"]
+
+[tool.ty.src]
+include = ["memorylayers"]
+
+[tool.ruff]
+extend-include = ['*.ipynb']
+line-length = 200
+
+[tool.ruff.format]
+exclude = ['*.md'] # leave code blocks in docs and plans as written
+
+[tool.ruff.lint]
+select = [
+    'F',   # pyflakes
+    'E',   # pycodestyle: Error
+    'W',   # pycodestyle: Warning
+    'I',   # isort
+    'D',   # pydocstyle
+    'UP',  # pyupgrade
+    'TID', # flake8-tidy-imports
+    'NPY', # numpy
+]
+
+ignore = [
+    'E501', # line too long
+    'E741', # ambiguous variable names
+    'D105', # Missing docstring in magic method
+    'D212', # Multi-line docstring summary should start at the second line
+    'D200', # One-line docstring should fit on one line with quotes
+    'D401', # First line should be in imperative mood
+    'D404', # First word of the docstring should not be "This
+    'D413', # Missing blank line after last section
+
+    # pydocstyle ignores, which could be enabled in future when existing
+    # issues are fixed
+    'D100', # Missing docstring in public module
+    'D101', # Missing docstring in public class
+    'D102', # Missing docstring in public method
+    'D103', # Missing docstring in public function
+    'D107', # Missing docstring in __init__
+    'D202', # No blank lines allowed after function docstring
+    'D203', # 1 blank line required before class docstring
+    'D205', # 1 blank line required between summary line and description
+    'D400', # First line should end with a period
+    'D415', # First line should end with a period, question mark, or exclamation point
+    'D417', # Missing argument descriptions in the docstring
+
+]
+
+[tool.ruff.lint.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["D104"] # the layer packages are empty markers
+
+[tool.importlinter]
+root_packages = ["memorylayers"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "memorylayers layers"
+type = "layers"
+layers = [
+    "memorylayers.tools",
+    "memorylayers.models",
+]
+
+[[tool.importlinter.contracts]]
+name = "memorylayers models import no functional code"
+type = "forbidden"
+source_modules = ["memorylayers.models"]
+forbidden_modules = ["memorylayers.tools"]
