@@ -84,7 +84,9 @@ include_external_packages = true
 name = "memorylayers layers"
 type = "layers"
 layers = [
+    "memorylayers.entry",
     "memorylayers.adapters",
+    "memorylayers.domain",
     "memorylayers.tools",
     "memorylayers.models",
 ]
@@ -93,4 +95,4 @@ layers = [
 name = "memorylayers models import no functional code"
 type = "forbidden"
 source_modules = ["memorylayers.models"]
-forbidden_modules = ["memorylayers.tools", "memorylayers.adapters"]
+forbidden_modules = ["memorylayers.tools", "memorylayers.domain", "memorylayers.adapters", "memorylayers.entry"]
