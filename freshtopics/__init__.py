@@ -1,0 +1,1 @@
+"""freshtopics skill package."""

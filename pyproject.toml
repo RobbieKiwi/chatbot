@@ -19,10 +19,10 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["memorylayers"]
+testpaths = ["memorylayers", "freshtopics"]
 
 [tool.ty.src]
-include = ["memorylayers"]
+include = ["memorylayers", "freshtopics"]
 
 [tool.ruff]
 extend-include = ['*.ipynb']
@@ -77,8 +77,13 @@ ban-relative-imports = "all"
 "__init__.py" = ["D104"] # the layer packages are empty markers
 
 [tool.importlinter]
-root_packages = ["memorylayers"]
+root_packages = ["memorylayers", "freshtopics"]
 include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Skill packages are independent"
+type = "independence"
+modules = ["memorylayers", "freshtopics"]
 
 [[tool.importlinter.contracts]]
 name = "memorylayers layers"
@@ -96,3 +101,8 @@ name = "memorylayers models import no functional code"
 type = "forbidden"
 source_modules = ["memorylayers.models"]
 forbidden_modules = ["memorylayers.tools", "memorylayers.domain", "memorylayers.adapters", "memorylayers.entry"]
+
+[[tool.importlinter.contracts]]
+name = "freshtopics layers"
+type = "layers"
+layers = ["freshtopics.__main__", "freshtopics.dao", "freshtopics.models"]
