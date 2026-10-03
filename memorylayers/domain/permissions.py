@@ -12,6 +12,8 @@ _WRITES = {
 
 
 def allowed_tools(*, kind: WorkerKind) -> list[str]:
+    if kind is WorkerKind.MIGRATOR:
+        return []  # the migrator answers with JSON and touches nothing
     tools = [f"Bash({_PYTHON} memorylayers {command}:*)" for command in [*_READS, *_WRITES[kind]]]
     if kind is WorkerKind.SCRIBE:
         tools.append(f"Bash({_PYTHON} freshtopics log:*)")

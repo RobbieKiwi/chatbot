@@ -5,7 +5,7 @@
 - Its memory is the `memorylayers` package and its topic history the `freshtopics` package, both at the project root. Each package writes its runtime data under its own `data/`, which is gitignored. Agents reach the packages only through their CLIs: `.venv/Scripts/python -m memorylayers --help` and `.venv/Scripts/python -m freshtopics --help`.
 - The `UserPromptSubmit` hook in `.claude/settings.json` runs `memorylayers.entry.hook` on every message (memory hints and the headless workers that file memory).
 - `memorylayers/data/chatbot/config.json`, when present, overrides the `MemoryConfig` defaults, such as `local_timezone` (an IANA zone name, `UTC` by default) for the dates memory shows.
-- User scripts take no arguments: `uv run python -m memorylayers.scripts.<name>` for `consolidate` and `unstick`.
+- User scripts take no arguments: `uv run python -m memorylayers.scripts.<name>` for `migrate_propose`, `migrate_apply`, `consolidate` and `unstick`. `migrate_propose` moves a legacy flat memory (`memorylayers/data/<parent>.db` and `<parent>.md`) into layered memory and stops when there is none.
 
 ## Python
 

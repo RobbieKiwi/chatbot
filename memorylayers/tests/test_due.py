@@ -51,3 +51,4 @@ def test_each_worker_gets_reads_plus_its_own_writes() -> None:
     assert "Bash(.venv/Scripts/python -m freshtopics log:*)" in scribe
     assert "Bash(.venv/Scripts/python -m memorylayers recall:*)" in scribe
     assert not any("tag-summary" in tool for tool in scribe)
+    assert allowed_tools(kind=WorkerKind.MIGRATOR) == []

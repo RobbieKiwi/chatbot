@@ -16,7 +16,7 @@ from memorylayers.models.dates import Bucket, OccurredRange
 from memorylayers.models.memory import Fact, FactTag, Period, RefreshState, Tag, TagAlias, TagSummary
 from memorylayers.models.tables import SEARCH_TABLE
 from memorylayers.models.views import FactCandidate, FactLine, FactSpan, NewTag, SearchHit, TagDates, TagLine, TagVocabulary
-from memorylayers.models.vocab import SearchKind
+from memorylayers.models.vocab import Precision, SearchKind
 from memorylayers.tools.occurred import label_occurred
 from memorylayers.tools.text import fts_query
 
@@ -191,6 +191,12 @@ class MemoryStore:
                 session.add(FactTag(fact_id=_id(fact), tag=tag))
             _index(session, kind=SearchKind.FACT, key=str(_id(fact)), body=detail)
             return _id(fact)
+
+    def import_fact(self, *, fact_id: int, detail: str, relevance: int, recorded_at: datetime) -> None:
+        """A legacy fact, keeping its id; tags and dates arrive when the migration is applied."""
+        with self._session() as session:
+            session.add(Fact(id=fact_id, detail=detail, relevance=relevance, recorded_at=recorded_at, occurred_precision=Precision.UNKNOWN, revision=_next_revision(session)))
+            _index(session, kind=SearchKind.FACT, key=str(fact_id), body=detail)
 
     def update_fact(self, *, fact_id: int, detail: str | None = None, relevance: int | None = None, occurred: OccurredRange | None = None, tags: list[str] | None = None) -> None:
         with self._session() as session:

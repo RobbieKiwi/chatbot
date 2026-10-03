@@ -43,6 +43,7 @@ class WorkerKind(StrEnum):
     SCRIBE = "scribe"
     SUMMARISER = "summariser"
     CONSOLIDATOR = "consolidator"
+    MIGRATOR = "migrator"
 
 
 SPECIAL_CATEGORIES = ("core", "agent_preferences")
