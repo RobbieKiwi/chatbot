@@ -220,5 +220,8 @@ front_end/.eslintcache
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# Everything the app writes at runtime
+# Everything the app writes at runtime, and the user's own persona and settings
 */data/
+persona/local/
+.claude/settings.local.json
+.superpowers/

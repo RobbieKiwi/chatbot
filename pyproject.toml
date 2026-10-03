@@ -19,10 +19,10 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["memorylayers", "freshtopics"]
+testpaths = ["memorylayers", "freshtopics", "persona"]
 
 [tool.ty.src]
-include = ["memorylayers", "freshtopics"]
+include = ["memorylayers", "freshtopics", "persona"]
 
 [tool.ruff]
 extend-include = ['*.ipynb']
@@ -77,7 +77,7 @@ ban-relative-imports = "all"
 "__init__.py" = ["D104"] # the layer packages are empty markers
 
 [tool.importlinter]
-root_packages = ["memorylayers", "freshtopics"]
+root_packages = ["memorylayers", "freshtopics", "persona"]
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
@@ -106,3 +106,20 @@ forbidden_modules = ["memorylayers.tools", "memorylayers.domain", "memorylayers.
 name = "freshtopics layers"
 type = "layers"
 layers = ["freshtopics.__main__", "freshtopics.dao", "freshtopics.models"]
+
+[[tool.importlinter.contracts]]
+name = "persona layers"
+type = "layers"
+layers = ["persona.__main__", "persona.entry", "persona.adapters", "persona.domain", "persona.models"]
+
+[[tool.importlinter.contracts]]
+name = "persona models import no functional code"
+type = "forbidden"
+source_modules = ["persona.models"]
+forbidden_modules = ["persona.domain", "persona.adapters", "persona.entry"]
+
+[[tool.importlinter.contracts]]
+name = "persona imports no skill package"
+type = "forbidden"
+source_modules = ["persona"]
+forbidden_modules = ["memorylayers", "freshtopics"]

@@ -1,0 +1,15 @@
+{
+  "cleanupPeriodDays": 3650,
+  "permissions": {
+    "allow": [
+      "Bash(.venv/Scripts/python -m memorylayers summary:*)",
+      "Bash(.venv/Scripts/python -m memorylayers recall:*)",
+      "Bash(.venv/Scripts/python -m memorylayers facts:*)",
+      "Bash(.venv/Scripts/python -m memorylayers search:*)",
+      "Bash(.venv/Scripts/python -m memorylayers periods:*)",
+      "Bash(.venv/Scripts/python -m memorylayers tags:*)",
+      "Bash(.venv/Scripts/python -m persona show:*)",
+      "Bash(.venv/Scripts/python -m persona set-user:*)"
+    ]
+  }
+}
