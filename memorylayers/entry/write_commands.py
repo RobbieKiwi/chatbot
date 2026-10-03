@@ -3,14 +3,17 @@
 import argparse
 from typing import Any
 
-from memorylayers.adapters.state_files import load_config
+from memorylayers.adapters.state_files import load_config, update_conversation
 from memorylayers.adapters.store import MemoryStore
 from memorylayers.domain.duplicates import close_matches
 from memorylayers.domain.recall import format_fact
 from memorylayers.domain.tag_resolution import resolve_tags
-from memorylayers.entry.common import CliError, add_parent, now_utc, open_store, paths_of
+from memorylayers.entry.common import CliError, add_parent, now_utc, open_store, paths_of, text_argument
+from memorylayers.models.conversation import ConversationState, PendingNote
 from memorylayers.models.dates import OccurredRange
 from memorylayers.tools.occurred import TIMELESS, OccurredFormatError, parse_occurred
+
+ROLLING_SUMMARY_WORDS = 450
 
 
 def _add_tag_flags(*, parser: argparse.ArgumentParser) -> None:
@@ -32,6 +35,7 @@ def register(*, subparsers: Any) -> None:
     _add_tag_flags(parser=store)
     _add_occurred_flags(parser=store, required=True)
     store.add_argument("--force-new", action="store_true", help="Store even though close matches exist.")
+    store.add_argument("--conversation", help="Record the fact in this conversation's ledger.")
     add_parent(parser=store)
     store.set_defaults(handler=_store)
 
@@ -49,6 +53,21 @@ def register(*, subparsers: Any) -> None:
     supersede.add_argument("--by", type=int, required=True)
     add_parent(parser=supersede)
     supersede.set_defaults(handler=_supersede)
+
+    pending = subparsers.add_parser("pending", help="Park, refine or drop facts still forming.")
+    pending.add_argument("action", choices=["add", "refine", "drop"])
+    pending.add_argument("--conversation", required=True)
+    pending.add_argument("--number", type=int)
+    pending.add_argument("--text", help="The note; read from stdin when omitted (add, refine).")
+    add_parent(parser=pending)
+    pending.set_defaults(handler=_pending)
+
+    rolling = subparsers.add_parser("rolling-summary", help="Replace the conversation's rolling summary.")
+    rolling.add_argument("action", choices=["set"])
+    rolling.add_argument("--conversation", required=True)
+    rolling.add_argument("--text", help="The summary; read from stdin when omitted.")
+    add_parent(parser=rolling)
+    rolling.set_defaults(handler=_rolling_summary)
 
 
 def _relevance(*, value: int) -> int:
@@ -96,7 +115,9 @@ def _store(args: argparse.Namespace) -> None:
         now = now_utc()
         for new in resolution.to_create:
             store.create_tag(new=new, now=now)
-        fact_id = store.add_fact(detail=args.detail, relevance=relevance, occurred=occurred, tags=names, source_conversation=None, now=now)
+        fact_id = store.add_fact(detail=args.detail, relevance=relevance, occurred=occurred, tags=names, source_conversation=args.conversation, now=now)
+    if args.conversation:
+        update_conversation(paths=paths, conversation_id=args.conversation, change=lambda state: state.ledger.append(fact_id))
     print(f"stored fact #{fact_id}")
 
 
@@ -123,3 +144,32 @@ def _supersede(args: argparse.Namespace) -> None:
         except (KeyError, ValueError) as error:
             raise CliError(f"cannot supersede #{args.old} by #{args.by}: {error}") from error
     print(f"fact #{args.old} superseded by #{args.by}")
+
+
+def _pending(args: argparse.Namespace) -> None:
+    paths = paths_of(args=args)
+    text = text_argument(args=args) if args.action in ("add", "refine") else ""
+
+    def change(state: ConversationState) -> None:
+        if args.action == "add":
+            number = max((note.number for note in state.pending_notes), default=0) + 1
+            state.pending_notes.append(PendingNote(number=number, text=text))
+            return
+        note = next((note for note in state.pending_notes if note.number == args.number), None)
+        if note is None:
+            raise CliError(f"no pending note {args.number}; notes are {[n.number for n in state.pending_notes]}")
+        if args.action == "refine":
+            note.text = text
+        else:
+            state.pending_notes.remove(note)
+
+    update_conversation(paths=paths, conversation_id=args.conversation, change=change)
+    print(f"pending {args.action}: done")
+
+
+def _rolling_summary(args: argparse.Namespace) -> None:
+    text = text_argument(args=args)
+    if len(text.split()) > ROLLING_SUMMARY_WORDS:
+        raise CliError(f"rolling summary has {len(text.split())} words; keep it under ~400")
+    update_conversation(paths=paths_of(args=args), conversation_id=args.conversation, change=lambda state: setattr(state, "rolling_summary", text))
+    print("rolling summary set")

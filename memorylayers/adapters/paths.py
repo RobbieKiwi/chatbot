@@ -7,6 +7,7 @@ from memorylayers.models.paths import ParentPaths
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = PACKAGE_ROOT.parent
+PROMPTS_DIR = PACKAGE_ROOT / "prompts"
 
 
 def data_root() -> Path:
@@ -21,4 +22,10 @@ def parent_paths(*, parent: str) -> ParentPaths:
         db=root / "memory.db",
         summary=root / "summary.md",
         config=root / "config.json",
+        registry=root / "sessions.json",
+        summariser_health=root / "summariser.json",
+        conversations=root / "conversations",
+        logs=root / "logs",
+        locks=root / "locks",
+        memory_guide=PROJECT_ROOT / ".claude" / "skills" / parent / "MEMORY-GUIDE.md",
     )

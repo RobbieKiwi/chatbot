@@ -8,8 +8,23 @@
       "Bash(.venv/Scripts/python -m memorylayers search:*)",
       "Bash(.venv/Scripts/python -m memorylayers periods:*)",
       "Bash(.venv/Scripts/python -m memorylayers tags:*)",
+      "Bash(.venv/Scripts/python -m memorylayers status:*)",
+      "Bash(.venv/Scripts/python -m memorylayers resume:*)",
       "Bash(.venv/Scripts/python -m persona show:*)",
       "Bash(.venv/Scripts/python -m persona set-user:*)"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.venv/Scripts/python -m memorylayers.entry.hook --parent chatbot",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }

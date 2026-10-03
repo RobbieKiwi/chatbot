@@ -34,4 +34,15 @@ class SearchKind(StrEnum):
     PERIOD = "period"
 
 
+class Role(StrEnum):
+    USER = "user"
+    ASSISTANT = "assistant"
+
+
+class WorkerKind(StrEnum):
+    SCRIBE = "scribe"
+    SUMMARISER = "summariser"
+    CONSOLIDATOR = "consolidator"
+
+
 SPECIAL_CATEGORIES = ("core", "agent_preferences")

@@ -1,6 +1,9 @@
 from collections.abc import Callable
+from datetime import UTC, datetime
 
+from memorylayers.adapters.state_files import load_conversation, save_conversation
 from memorylayers.adapters.store import MemoryStore
+from memorylayers.models.conversation import ConversationState
 from memorylayers.models.paths import ParentPaths
 from memorylayers.models.views import NewTag
 from memorylayers.models.vocab import TagKind
@@ -13,6 +16,15 @@ def _seed(paths: ParentPaths) -> None:
     with MemoryStore(db_path=paths.db) as store:
         store.create_tag(new=NewTag(name="friend", kind=TagKind.CATEGORY, description="friends"), now=NOW)
         store.create_tag(new=NewTag(name="jordan", kind=TagKind.ENTITY, description="tango friend"), now=NOW)
+    at = datetime(2026, 10, 3, 18, 0, tzinfo=UTC)
+    save_conversation(paths=paths, state=ConversationState(id="c1", started_at=at, last_activity=at))
+
+
+def test_store_writes_a_fact_and_records_it_in_the_ledger(paths: ParentPaths, run_cli: Run) -> None:
+    _seed(paths)
+    code, out, _ = run_cli(["store", "--detail", "Jordan teaches tango on Tuesdays", "--relevance", "6", "--tags", "jordan,friends", "--timeless", "--conversation", "c1"])
+    assert (code, out.strip()) == (0, "stored fact #1")
+    assert load_conversation(paths=paths, conversation_id="c1").ledger == [1]
 
 
 def test_store_rejects_relevance_zero_and_bad_dates(paths: ParentPaths, run_cli: Run) -> None:
@@ -48,3 +60,21 @@ def test_update_and_supersede(paths: ParentPaths, run_cli: Run) -> None:
     assert run_cli(["supersede", "1", "--by", "2"])[0] == 0
     _, out, _ = run_cli(["facts", "jordan"])
     assert "#1" not in out and "#2" in out
+
+
+def test_pending_notes_and_rolling_summary(paths: ParentPaths, run_cli: Run) -> None:
+    _seed(paths)
+    run_cli(["pending", "add", "--conversation", "c1", "--text", "may be moving to Bonn"])
+    run_cli(["pending", "add", "--conversation", "c1", "--text", "thinking about a new job"])
+    run_cli(["pending", "refine", "--conversation", "c1", "--number", "1", "--text", "moving to Bonn in spring"])
+    run_cli(["pending", "drop", "--conversation", "c1", "--number", "2"])
+    run_cli(["rolling-summary", "set", "--conversation", "c1", "--text", "We talked about tango."])
+    state = load_conversation(paths=paths, conversation_id="c1")
+    assert [(note.number, note.text) for note in state.pending_notes] == [(1, "moving to Bonn in spring")]
+    assert state.rolling_summary == "We talked about tango."
+    assert run_cli(["pending", "drop", "--conversation", "c1", "--number", "9"])[0] == 2
+
+
+def test_rolling_summary_has_a_word_limit(paths: ParentPaths, run_cli: Run) -> None:
+    _seed(paths)
+    assert run_cli(["rolling-summary", "set", "--conversation", "c1", "--text", "word " * 500])[0] == 2

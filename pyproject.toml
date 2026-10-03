@@ -89,7 +89,7 @@ modules = ["memorylayers", "freshtopics"]
 name = "memorylayers layers"
 type = "layers"
 layers = [
-    "memorylayers.entry",
+    "memorylayers.scripts | memorylayers.entry",
     "memorylayers.adapters",
     "memorylayers.domain",
     "memorylayers.tools",
@@ -100,12 +100,18 @@ layers = [
 name = "memorylayers models import no functional code"
 type = "forbidden"
 source_modules = ["memorylayers.models"]
-forbidden_modules = ["memorylayers.tools", "memorylayers.domain", "memorylayers.adapters", "memorylayers.entry"]
+forbidden_modules = ["memorylayers.tools", "memorylayers.domain", "memorylayers.adapters", "memorylayers.entry", "memorylayers.scripts"]
 
 [[tool.importlinter.contracts]]
 name = "freshtopics layers"
 type = "layers"
 layers = ["freshtopics.__main__", "freshtopics.dao", "freshtopics.models"]
+
+[[tool.importlinter.contracts]]
+name = "The hook path stays free of SQLModel"
+type = "forbidden"
+source_modules = ["memorylayers.entry.hook", "memorylayers.entry.launch"]
+forbidden_modules = ["sqlmodel", "sqlalchemy"]
 
 [[tool.importlinter.contracts]]
 name = "persona layers"

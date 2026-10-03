@@ -69,6 +69,19 @@ class SearchHit(BaseModel):
     snippet: str
 
 
+class HintIndex(BaseModel):
+    tags: list[TagLine] = Field(default_factory=list)
+    aliases: dict[str, str] = Field(default_factory=dict)
+    period_names: list[str] = Field(default_factory=list)
+    era_names: list[str] = Field(default_factory=list)
+    summary_hits: list[str] = Field(default_factory=list)  # tag or period names whose summaries match
+
+
+class HintPointer(BaseModel):
+    key: str
+    label: str  # "jordan (entity, 5 facts)"
+
+
 class RefreshStatus(BaseModel):
     facts_since_refresh: int
     fact_count: int

@@ -1,0 +1,13 @@
+{"type":"queue-operation","operation":"enqueue","sessionId":"s1","timestamp":"2026-10-01T23:29:00.000Z"}
+{"type":"user","sessionId":"s1","timestamp":"2026-10-01T23:30:00.000Z","isSidechain":false,"message":{"role":"user","content":"<command-message>chatbot</command-message>\n<command-name>/chatbot</command-name>"}}
+{"type":"user","sessionId":"s1","timestamp":"2026-10-01T23:30:00.100Z","isMeta":true,"isSidechain":false,"message":{"role":"user","content":[{"type":"text","text":"Base directory for this skill: ..."}]}}
+{"type":"assistant","sessionId":"s1","timestamp":"2026-10-01T23:30:05.000Z","isSidechain":false,"message":{"role":"assistant","content":[{"type":"thinking","thinking":"secret reasoning"}]}}
+{"type":"assistant","sessionId":"s1","timestamp":"2026-10-01T23:30:06.000Z","isSidechain":false,"message":{"role":"assistant","content":[{"type":"tool_use","id":"t1","name":"Bash","input":{"command":"ls"}}]}}
+{"type":"user","sessionId":"s1","timestamp":"2026-10-01T23:30:07.000Z","isSidechain":false,"toolUseResult":{"stdout":"x"},"message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"x"}]}}
+{"type":"assistant","sessionId":"s1","timestamp":"2026-10-01T23:30:10.000Z","isSidechain":false,"message":{"role":"assistant","content":[{"type":"text","text":"Hello, Alex. Tell me something true."}]}}
+{"type":"attachment","sessionId":"s1","timestamp":"2026-10-01T23:30:11.000Z","attachment":{"type":"hook_additional_context","content":"<memory-hints>jordan</memory-hints>"}}
+{"type":"user","sessionId":"s1","timestamp":"2026-10-01T23:31:00.000Z","isSidechain":false,"message":{"role":"user","content":[{"type":"text","text":"<ide_opened_file>The user opened x.py</ide_opened_file>"},{"type":"text","text":"Yesterday I went dancing with Jordan."}]}}
+{"type":"system","sessionId":"s1","subtype":"turn_duration","timestamp":"2026-10-01T23:31:01.000Z"}
+{"type":"assistant","sessionId":"s1","timestamp":"2026-10-01T23:31:30.000Z","isSidechain":true,"message":{"role":"assistant","content":[{"type":"text","text":"subagent chatter"}]}}
+{"type":"user","sessionId":"s1","timestamp":"2026-10-01T23:32:00.000Z","isSidechain":false,"isCompactSummary":true,"message":{"role":"user","content":"This session is being continued from a previous conversation..."}}
+{"type":"assistant","sessionId":"s1","timestamp":"2026-10-01T23:33:00.000Z","isSidechain":false,"message":{"role":"assistant","content":[{"type":"text","text":"<system-reminder>ignore</system-reminder>Tango? Of course you did."}]}}

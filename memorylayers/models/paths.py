@@ -11,3 +11,9 @@ class ParentPaths(BaseModel):
     db: Path
     summary: Path  # the high-level summary
     config: Path
+    registry: Path
+    summariser_health: Path
+    conversations: Path
+    logs: Path
+    locks: Path
+    memory_guide: Path

@@ -1,7 +1,11 @@
+from datetime import UTC, datetime
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
 from memorylayers.models.config import MemoryConfig
+from memorylayers.models.conversation import ConversationState, PendingNote, SessionLink
 from memorylayers.models.memory import Fact, FactTag, Period, RefreshState, Tag, TagAlias, TagSummary
 from memorylayers.models.vocab import Precision
 
@@ -22,6 +26,19 @@ def test_config_defaults_match_the_spec() -> None:
 def test_config_rejects_unknown_settings() -> None:
     with pytest.raises(ValidationError):
         MemoryConfig.model_validate({"scribe_threshold": 10})
+
+
+def test_conversation_state_round_trips_through_json() -> None:
+    now = datetime(2026, 10, 3, 20, 0, tzinfo=UTC)
+    state = ConversationState(
+        id="2026-10-03-220000",
+        started_at=now,
+        last_activity=now,
+        sessions=[SessionLink(session_id="abc", transcript_path=Path("t.jsonl"), processed_line=4)],
+        pending_notes=[PendingNote(number=1, text="may be moving to Bonn")],
+        ledger=[3, 9],
+    )
+    assert ConversationState.model_validate_json(state.model_dump_json()) == state
 
 
 def test_table_names_follow_the_spec() -> None:

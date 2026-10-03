@@ -1,3 +1,5 @@
+import json
+import shutil
 from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
 from pathlib import Path
@@ -33,3 +35,22 @@ def run_cli(paths: ParentPaths, capsys: pytest.CaptureFixture[str]) -> Callable[
         return code, captured.out, captured.err
 
     return run
+
+
+@pytest.fixture
+def local_persona(shipped_persona: Path) -> Path:
+    """A local persona naming the assistant Nova and the user Alex, in place of the shipped default."""
+    local = shipped_persona / "local"
+    shutil.copytree(shipped_persona / "default", local)
+    (local / "persona.json").write_text(json.dumps({"assistant_name": "Nova", "user_name": "Alex"}), encoding="utf-8")
+    return local
+
+
+@pytest.fixture
+def broken_persona(shipped_persona: Path) -> Path:
+    """A local persona whose persona.json is not JSON; returns that file."""
+    local = shipped_persona / "local"
+    local.mkdir()
+    names = local / "persona.json"
+    names.write_text("{ not json", encoding="utf-8")
+    return names
