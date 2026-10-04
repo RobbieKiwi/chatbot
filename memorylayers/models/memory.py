@@ -9,7 +9,7 @@ from sqlalchemy.engine import Dialect
 from sqlalchemy.types import TypeDecorator
 from sqlmodel import Field, SQLModel
 
-from memorylayers.models.tables import FACT_TABLE, FACT_TAG_TABLE, PERIOD_TABLE, REFRESH_STATE_TABLE, TAG_ALIAS_TABLE, TAG_SUMMARY_TABLE, TAG_TABLE
+from memorylayers.models.tables import FACT_TABLE, FACT_TAG_TABLE, GAP_TABLE, PERIOD_TABLE, REFRESH_STATE_TABLE, TAG_ALIAS_TABLE, TAG_SUMMARY_TABLE, TAG_TABLE
 from memorylayers.models.vocab import PeriodKind, Precision, TagKind
 
 
@@ -106,3 +106,15 @@ class RefreshState(SQLModel, table=True):
     through_revision: int = 0
     refreshed_at: datetime | None = Field(default=None, sa_type=UtcDateTime)
     calendar_week_start: date | None = None  # Monday of the week the bucket calendar was last rolled to
+
+
+class Gap(SQLModel, table=True):
+    """Something memory knows exists but knows little about: a lead for the assistant's curiosity. The summariser rewrites the whole list."""
+
+    __tablename__ = GAP_TABLE
+
+    id: int | None = Field(default=None, primary_key=True)
+    tag: str = Field(index=True)  # no foreign key: a tag merge must not fail on a gap
+    text: str
+    written_at: datetime = Field(sa_type=UtcDateTime)
+    last_shown_at: datetime | None = Field(default=None, sa_type=UtcDateTime)

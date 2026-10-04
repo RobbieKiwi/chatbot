@@ -2,7 +2,7 @@
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from memorylayers.models.dates import Bucket
 from memorylayers.models.vocab import SearchKind, TagKind
@@ -107,3 +107,17 @@ class BriefSection(BaseModel):
     facts: list[FactLine]
     existing_summary: str
     child_summaries: dict[str, str] = Field(default_factory=dict)
+
+
+class NewGap(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    tag: str
+    text: str = Field(min_length=1)
+
+
+class GapLine(BaseModel):
+    id: int
+    tag: str
+    text: str
+    last_shown_at: datetime | None

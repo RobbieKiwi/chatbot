@@ -6,7 +6,7 @@ _PYTHON = ".venv/Scripts/python -m"
 _READS = ["summary", "recall", "facts", "search", "periods", "tags", "status"]
 _WRITES = {
     WorkerKind.SCRIBE: ["store", "update", "supersede", "pending", "rolling-summary", "commit"],
-    WorkerKind.SUMMARISER: ["refresh-plan", "tag-summary", "period", "era", "high-level-summary", "refresh"],
+    WorkerKind.SUMMARISER: ["refresh-plan", "tag-summary", "period", "era", "high-level-summary", "gaps", "refresh"],
     WorkerKind.CONSOLIDATOR: ["tag", "alias", "fact", "supersede", "refresh"],
 }
 

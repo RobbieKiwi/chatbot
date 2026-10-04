@@ -105,7 +105,7 @@ forbidden_modules = ["memorylayers.tools", "memorylayers.domain", "memorylayers.
 [[tool.importlinter.contracts]]
 name = "freshtopics layers"
 type = "layers"
-layers = ["freshtopics.__main__", "freshtopics.dao", "freshtopics.models"]
+layers = ["freshtopics.__main__", "freshtopics.dao | freshtopics.gap_probe | freshtopics.word_lists", "freshtopics.seeds", "freshtopics.models"]
 
 [[tool.importlinter.contracts]]
 name = "The hook path stays free of SQLModel"

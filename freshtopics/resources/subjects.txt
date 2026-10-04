@@ -1,0 +1,216 @@
+acoustics
+actuarial science
+aerodynamics
+agronomy
+anaesthesiology
+anatomy
+ancient egyptian history
+animal husbandry
+animation
+anthropology
+antique restoration
+apiculture
+aquaculture
+archaeology
+architecture
+archival science
+art history
+astrobiology
+astronomy
+astrophysics
+auctioneering
+aviation
+ballet
+bankruptcy law
+basket weaving
+beekeeping
+bell founding
+biochemistry
+bioinformatics
+blacksmithing
+bonsai cultivation
+bookbinding
+botany
+bread baking
+brewing
+bricklaying
+bridge engineering
+byzantine history
+cabinetmaking
+calligraphy
+candle making
+cardiology
+carpentry
+cartography
+ceramics
+cheesemaking
+chess theory
+choreography
+chronobiology
+cinematography
+civil engineering
+classical greek
+climatology
+clockmaking
+coffee roasting
+cognitive science
+competition law
+competitive cycling
+composition
+contract law
+cooperage
+copyright law
+cosmology
+criminology
+cryptography
+crystallography
+cuneiform studies
+dendrochronology
+dentistry
+dermatology
+dog training
+drystone walling
+ecology
+econometrics
+egyptology
+electrical engineering
+embroidery
+endocrinology
+entomology
+epidemiology
+epistemology
+ethics
+ethnomusicology
+etymology
+falconry
+fencing
+fermentation
+film editing
+fire safety engineering
+fly fishing
+folklore
+forensic accounting
+forensic science
+forestry
+furniture restoration
+game design
+game theory
+garden design
+gastronomy
+gemology
+genealogy
+genetics
+geodesy
+geology
+geomorphology
+glaciology
+glassblowing
+graph theory
+graphic design
+gymnastics
+hatmaking
+heraldry
+herpetology
+horology
+horticulture
+hydrology
+ichthyology
+immunology
+industrial design
+information theory
+insurance underwriting
+interior design
+international law
+jazz improvisation
+jewellery making
+journalism
+knitting
+lacemaking
+landscape painting
+leatherwork
+lexicography
+linguistics
+lock picking
+logic
+luthiery
+macroeconomics
+magic tricks
+marine biology
+maritime law
+martial arts
+metallurgy
+meteorology
+microbiology
+midwifery
+mineralogy
+mountaineering
+museum curation
+musicology
+mycology
+mythology
+nanotechnology
+naval architecture
+neuroscience
+numismatics
+nutrition
+oceanography
+oncology
+opera
+optics
+orbital mechanics
+origami
+ornithology
+paediatrics
+palaeontology
+papermaking
+perfumery
+pharmacology
+philately
+phonetics
+photography
+plumbing
+poetry
+probability
+puppetry
+quantum mechanics
+radio broadcasting
+rail engineering
+rhetoric
+robotics
+sailing
+sculpture
+seismology
+semiotics
+shipbuilding
+shoemaking
+sign language
+soil science
+sommelier craft
+sound design
+speleology
+stained glass
+stand-up comedy
+statistics
+stonemasonry
+surgery
+tailoring
+tax law
+taxidermy
+tea ceremony
+textile dyeing
+thatching
+theology
+thermodynamics
+topology
+toxicology
+translation
+typography
+urban planning
+veterinary medicine
+viticulture
+volcanology
+watchmaking
+weaving
+welding
+woodturning
+zoology

@@ -31,6 +31,7 @@ class ConversationState(BaseModel):
     ledger: list[int] = Field(default_factory=list)  # ids of facts written in this conversation
     pending_notes: list[PendingNote] = Field(default_factory=list)
     hints_shown: list[str] = Field(default_factory=list)
+    messages_seen: int = 0  # messages the hook has seen in this conversation
     scribe_health: WorkerHealth = Field(default_factory=WorkerHealth)
 
 

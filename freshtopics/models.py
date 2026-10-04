@@ -36,3 +36,17 @@ class TopicsData(BaseModel):
     terrible_topics: list[str] = Field(default=[])
     excellent_topics: list[str] = Field(default=[])
     topics: list[TopicEntry] = Field(default=[])
+
+
+class Seeds(BaseModel):
+    """Random starting points for the muse: two concrete nouns and a field of knowledge."""
+
+    words: tuple[str, str]
+    subject: str
+
+
+class Probe(BaseModel):
+    """A gap in memory, proposed as a topic in place of seeds."""
+
+    tag: str
+    text: str

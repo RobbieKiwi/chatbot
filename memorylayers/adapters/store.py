@@ -13,9 +13,9 @@ from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, col, create_engine, delete, select
 
 from memorylayers.models.dates import Bucket, OccurredRange
-from memorylayers.models.memory import Fact, FactTag, Period, RefreshState, Tag, TagAlias, TagSummary
+from memorylayers.models.memory import Fact, FactTag, Gap, Period, RefreshState, Tag, TagAlias, TagSummary
 from memorylayers.models.tables import SEARCH_TABLE
-from memorylayers.models.views import FactCandidate, FactLine, FactSpan, NewTag, SearchHit, TagDates, TagLine, TagVocabulary
+from memorylayers.models.views import FactCandidate, FactLine, FactSpan, GapLine, NewGap, NewTag, SearchHit, TagDates, TagLine, TagVocabulary
 from memorylayers.models.vocab import Precision, SearchKind
 from memorylayers.tools.occurred import label_occurred
 from memorylayers.tools.text import fts_query
@@ -346,6 +346,24 @@ class MemoryStore:
         """The next summariser run rebuilds every summary."""
         with self._session() as session:
             session.merge(RefreshState(id=1, through_revision=0, refreshed_at=None, calendar_week_start=None))
+
+    # Gaps
+
+    def gaps(self) -> list[GapLine]:
+        with self._session() as session:
+            rows = session.exec(select(Gap).order_by(col(Gap.id))).all()
+        return [GapLine(id=gap.id, tag=gap.tag, text=gap.text, last_shown_at=gap.last_shown_at) for gap in rows if gap.id is not None]
+
+    def replace_gaps(self, *, gaps: list[NewGap], now: datetime) -> None:
+        """Replace the whole list. A tag keeps its latest showing, so rewording a gap does not reset its cooldown."""
+        with self._session() as session:
+            shown: dict[str, datetime] = {}
+            for gap in session.exec(select(Gap)):
+                if gap.last_shown_at is not None and (gap.tag not in shown or gap.last_shown_at > shown[gap.tag]):
+                    shown[gap.tag] = gap.last_shown_at
+            session.exec(delete(Gap))
+            for gap in gaps:
+                session.add(Gap(tag=gap.tag, text=gap.text, written_at=now, last_shown_at=shown.get(gap.tag)))
 
     # Search
 

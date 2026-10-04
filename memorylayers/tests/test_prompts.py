@@ -49,6 +49,8 @@ def test_the_real_templates_fill_without_gaps() -> None:
         names=NAMES,
     )
     assert "refresh commit --run summariser-1 --parent chatbot" in summariser
-    assert "$" not in summariser
+    assert "gaps set --parent chatbot --json" in summariser
+    assert "gaps list --parent chatbot" in summariser
+    assert "Alex" in summariser and "Nova uses gaps" in summariser and "$" not in summariser
     consolidator = build_consolidator_brief(template=load_prompt(name="consolidate"), parent="chatbot", run_id="consolidator-1", now_local=NOW, tags=[], aliases={}, facts=[], guide="GUIDE")
     assert "refresh reset --parent chatbot" in consolidator

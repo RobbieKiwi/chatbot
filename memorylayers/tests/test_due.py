@@ -52,3 +52,8 @@ def test_each_worker_gets_reads_plus_its_own_writes() -> None:
     assert "Bash(.venv/Scripts/python -m memorylayers recall:*)" in scribe
     assert not any("tag-summary" in tool for tool in scribe)
     assert allowed_tools(kind=WorkerKind.MIGRATOR) == []
+
+
+def test_the_summariser_may_set_gaps() -> None:
+    assert "Bash(.venv/Scripts/python -m memorylayers gaps:*)" in allowed_tools(kind=WorkerKind.SUMMARISER)
+    assert "Bash(.venv/Scripts/python -m memorylayers gaps:*)" not in allowed_tools(kind=WorkerKind.SCRIBE)

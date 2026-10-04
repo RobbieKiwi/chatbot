@@ -2,9 +2,13 @@
 
 import argparse
 import io
+import random
 import sys
 
 from freshtopics.dao import add_topic_entry, get_topic_summary
+from freshtopics.gap_probe import list_available_gaps
+from freshtopics.seeds import choose_seed, render_seed
+from freshtopics.word_lists import read_word_list
 
 
 def _context(args: argparse.Namespace) -> None:
@@ -22,6 +26,17 @@ def _log(args: argparse.Namespace) -> None:
     print(f"logged: {args.phrase.strip().lower()}")
 
 
+def _seeds(args: argparse.Namespace) -> None:
+    seed = choose_seed(
+        probe_chance=args.probe_chance,
+        rng=random.Random(),
+        list_gaps=lambda: list_available_gaps(parent=args.parent),
+        words=read_word_list(name="seed_words.txt"),
+        subjects=read_word_list(name="subjects.txt"),
+    )
+    print(render_seed(seed=seed))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m freshtopics", description="Conversation topic history for a parent skill.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -35,6 +50,10 @@ def build_parser() -> argparse.ArgumentParser:
     log.add_argument("--initiator", required=True, choices=["skill", "user"])
     log.add_argument("--score", type=int, default=5, help="1 hated it · 3 asked to move on · 5 neutral · 7 good conversation · 10 loved it.")
     log.set_defaults(handler=_log)
+    seeds = subparsers.add_parser("seeds", help="Where a new topic starts: a gap in memory to probe, or two nouns and a field of knowledge.")
+    seeds.add_argument("--parent", required=True)
+    seeds.add_argument("--probe-chance", type=float, default=0.25, help="Chance of a probe instead of seeds, 0–1.")
+    seeds.set_defaults(handler=_seeds)
     return parser
 
 

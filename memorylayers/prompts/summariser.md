@@ -44,6 +44,14 @@ $high_level_summary
 - A period summary says what happened in that span. Fold in the summaries of the periods inside it, which are listed with it.
 - The high-level summary, rebuilt last: core facts; agent preferences; one line per era, in order; then the recent weeks, months and quarters in more detail. Under ~2000 words.
 
+## Gaps
+
+A gap is one line naming something memory knows exists but knows little about, tied to the tag it concerns. $assistant uses gaps to be curious, bringing them up with $user when the moment allows. For example:
+
+`{"tag": "acme", "text": "$user works at Acme, but nothing is known about what the days there are like."}`
+
+Choose gaps by the memory guide's relevance: core identity, major life events, strong preferences, routines. A good gap is something memory names but does not describe — a job never described, a city never talked about, a person mentioned once and never again. Never trivia. Never anything recorded under agent_preferences as a topic to avoid. Each gap's tag must be an existing tag or alias. Write 5–10 gaps, replacing the whole list; keep a gap from the current list when it is still a gap.
+
 ## Commands
 
 - `.venv/Scripts/python -m memorylayers tag-summary set --tag NAME --parent $parent --text "..."`
@@ -51,6 +59,8 @@ $high_level_summary
 - `.venv/Scripts/python -m memorylayers era set --name "Lisbon" --start 2019-03 --end 2021-06 --parent $parent --text "..."` (omit `--end` for an ongoing era; omit `--text` to keep the summary)
 - `.venv/Scripts/python -m memorylayers era delete --name NAME --parent $parent`
 - `.venv/Scripts/python -m memorylayers high-level-summary set --parent $parent --text "..."`
+- `.venv/Scripts/python -m memorylayers gaps list --parent $parent` (the current gaps)
+- `.venv/Scripts/python -m memorylayers gaps set --parent $parent --json '[{"tag": "...", "text": "..."}, ...]'`
 - When the brief is not enough: `recall NAME`, `facts NAME --limit N`, `search "query"`, each as `.venv/Scripts/python -m memorylayers <command> --parent $parent`.
 - Last, once everything else is done — without it this whole run is repeated:
   `.venv/Scripts/python -m memorylayers refresh commit --run $run --parent $parent`
@@ -61,4 +71,5 @@ $high_level_summary
 2. Adjust eras if the facts call for it.
 3. Rewrite each due period summary.
 4. Rebuild the high-level summary.
-5. Commit.
+5. Read the current gaps, then write 5–10 gaps with `gaps set`.
+6. Commit.

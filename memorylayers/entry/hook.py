@@ -1,20 +1,23 @@
 """UserPromptSubmit hook: memory hints for the persona, and the launch of due workers. It never blocks a message."""
 
 import argparse
+import random
 import sys
 import traceback
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
+from random import Random
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel
 
-from memorylayers.adapters.hook_store import read_hint_index, read_refresh_status
+from memorylayers.adapters.hook_store import read_gaps, read_hint_index, read_refresh_status, stamp_gap
 from memorylayers.adapters.paths import parent_paths
 from memorylayers.adapters.processes import find_claude, runner_command
 from memorylayers.adapters.state_files import load_config, load_conversation, load_registry, load_summariser_health, update_conversation, update_registry
 from memorylayers.adapters.transcripts import read_conversation_turns
+from memorylayers.domain.curiosity import available_gaps, curiosity_fires, pick_gap, render_curiosity
 from memorylayers.domain.due import scribe_due, summariser_due
 from memorylayers.domain.hints import HINT_LIMIT, match_hints, render_hints
 from memorylayers.domain.window import unprocessed_chars
@@ -54,7 +57,16 @@ def _launch_due(*, paths: ParentPaths, config: MemoryConfig, state: Conversation
         spawn(runner_command(parent=paths.parent, kind=WorkerKind.SUMMARISER))
 
 
-def handle_prompt(*, payload: HookPayload, paths: ParentPaths, now: datetime, spawn: Spawn, claude_available: Callable[[], bool]) -> str:
+def _curiosity(*, paths: ParentPaths, config: MemoryConfig, messages_seen: int, now: datetime, rng: Random) -> str:
+    if not curiosity_fires(messages_seen=messages_seen, skip_turns=config.curiosity_skip_turns, every_turns=config.curiosity_every_turns, rng=rng):
+        return ""
+    gap = pick_gap(gaps=available_gaps(gaps=read_gaps(db_path=paths.db), now=now, cooldown_days=config.gap_cooldown_days), rng=rng)
+    if gap is None or not stamp_gap(db_path=paths.db, gap_id=gap.id, now=now):
+        return ""
+    return render_curiosity(gap=gap)
+
+
+def handle_prompt(*, payload: HookPayload, paths: ParentPaths, now: datetime, spawn: Spawn, claude_available: Callable[[], bool], rng: Random) -> str:
     if is_registration_prompt(prompt=payload.prompt, parent=paths.parent):
         pending = PendingRegistration(session_id=payload.session_id, transcript_path=payload.transcript_path, seen_at=now)
         update_registry(paths=paths, change=lambda registry: setattr(registry, "pending", pending))
@@ -76,13 +88,15 @@ def handle_prompt(*, payload: HookPayload, paths: ParentPaths, now: datetime, sp
     def note(state: ConversationState) -> None:
         state.hints_shown.extend(pointer.key for pointer in pointers)
         state.last_activity = now
+        state.messages_seen += 1
 
     state = update_conversation(paths=paths, conversation_id=conversation_id, change=note)
+    curiosity = _curiosity(paths=paths, config=config, messages_seen=state.messages_seen, now=now, rng=rng)
     if claude_available():
         _launch_due(paths=paths, config=config, state=state, now=now, spawn=spawn)
     else:
         _log(paths=paths, message=f"{config.claude_executable!r} not found; no workers launched")
-    return render_hints(pointers=pointers)
+    return "\n".join(part for part in (render_hints(pointers=pointers), curiosity) if part)
 
 
 def _log(*, paths: ParentPaths, message: str) -> None:
@@ -111,6 +125,7 @@ def main(*, argv: list[str], stdin_bytes: bytes) -> str:
             now=datetime.now(UTC),
             spawn=lambda command: spawn_runner(paths=paths, command=command),
             claude_available=lambda: find_claude(executable=executable) is not None,
+            rng=random.Random(),
         )
     except Exception:
         _log(paths=paths, message=traceback.format_exc())

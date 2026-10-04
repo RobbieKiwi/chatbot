@@ -19,3 +19,6 @@ class MemoryConfig(BaseModel):
     summariser_model: str = "sonnet"
     local_timezone: str = "UTC"  # IANA zone name
     claude_executable: str = "claude"
+    gap_cooldown_days: int = 14  # a gap shown to the assistant rests this long
+    curiosity_skip_turns: int = 3  # no curiosity during a conversation's first messages
+    curiosity_every_turns: int = 8  # after that, curiosity fires with probability 1 / this
