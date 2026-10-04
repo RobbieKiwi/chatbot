@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__ASSISTANT__</title>
+<style>
+  :root { --bg: #f6f5f2; --fg: #22211f; --muted: #6f6c66; --field: #ffffff; --line: #d9d6cf; --accent: #3d5a80; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1b1b1d; --fg: #ecebe8; --muted: #a09d97; --field: #262629; --line: #3a3a3e; --accent: #8fb3dc; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: var(--bg); color: var(--fg); font: 17px/1.5 system-ui, sans-serif; }
+  form { width: min(22rem, calc(100vw - 32px)); display: grid; gap: 12px; }
+  h1 { margin: 0 0 4px; font-size: 1.4rem; font-weight: 600; }
+  input, button { font: inherit; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); }
+  input { background: var(--field); color: var(--fg); }
+  button { background: var(--accent); color: var(--bg); border: none; font-weight: 600; }
+  #error { min-height: 1.5em; color: var(--muted); margin: 0; }
+</style>
+</head>
+<body>
+<form id="login">
+  <h1>__ASSISTANT__</h1>
+  <input id="passphrase" type="password" autocomplete="current-password" placeholder="Passphrase" required autofocus>
+  <button type="submit">Enter</button>
+  <p id="error"></p>
+</form>
+<script>
+  const form = document.getElementById("login");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = form.querySelector("button");
+    button.disabled = true;
+    const response = await fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ passphrase: document.getElementById("passphrase").value }),
+    });
+    if (response.status === 204) { location.reload(); return; }
+    document.getElementById("error").textContent = "That's not it.";
+    button.disabled = false;
+  });
+</script>
+</body>
+</html>

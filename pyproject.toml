@@ -4,14 +4,18 @@ version = "0.0.0"
 description = "An repository for doing ai stuff"
 requires-python = ">=3.13"
 dependencies = [
+    "claude-agent-sdk>=0.2.163",
+    "fastapi>=0.142.2",
     "pydantic>=2.13.4",
     "sqlalchemy>=2.0.51",
     "sqlmodel>=0.0.39",
     "tzdata>=2025.2",
+    "uvicorn>=0.54.0",
 ]
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "import-linter>=2.3",
     "pytest>=8.0.0",
     "ruff>=0.13.0",
@@ -19,10 +23,10 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "persona"]
+testpaths = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "webchat", "persona"]
 
 [tool.ty.src]
-include = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "persona"]
+include = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "webchat", "persona"]
 
 [tool.ruff]
 extend-include = ['*.ipynb']
@@ -77,13 +81,13 @@ ban-relative-imports = "all"
 "__init__.py" = ["D104"] # the layer packages are empty markers
 
 [tool.importlinter]
-root_packages = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "persona"]
+root_packages = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "webchat", "persona"]
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "Skill packages are independent"
 type = "independence"
-modules = ["memorylayers", "freshtopics", "feedback", "mood"]
+modules = ["memorylayers", "freshtopics", "feedback", "mood", "webchat"]
 
 [[tool.importlinter.contracts]]
 name = "memorylayers layers"
@@ -122,7 +126,7 @@ layers = ["clauderecords.turns", "clauderecords.models"]
 name = "clauderecords imports no skill package"
 type = "forbidden"
 source_modules = ["clauderecords"]
-forbidden_modules = ["memorylayers", "freshtopics", "feedback", "mood"]
+forbidden_modules = ["memorylayers", "freshtopics", "feedback", "mood", "webchat"]
 
 [[tool.importlinter.contracts]]
 name = "persona layers"
@@ -139,7 +143,7 @@ forbidden_modules = ["persona.domain", "persona.adapters", "persona.entry"]
 name = "persona imports no skill package and no clauderecords"
 type = "forbidden"
 source_modules = ["persona"]
-forbidden_modules = ["memorylayers", "freshtopics", "feedback", "mood", "clauderecords"]
+forbidden_modules = ["memorylayers", "freshtopics", "feedback", "mood", "webchat", "clauderecords"]
 
 [[tool.importlinter.contracts]]
 name = "memorylayers and freshtopics keep their own transcript readers"
@@ -168,3 +172,20 @@ name = "mood models import no functional code"
 type = "forbidden"
 source_modules = ["mood.models"]
 forbidden_modules = ["mood.domain", "mood.adapters", "mood.entry"]
+
+[[tool.importlinter.contracts]]
+name = "webchat layers"
+type = "layers"
+layers = [
+    "webchat.__main__ | webchat.scripts",
+    "webchat.entry",
+    "webchat.adapters",
+    "webchat.domain",
+    "webchat.models",
+]
+
+[[tool.importlinter.contracts]]
+name = "webchat models import no functional code"
+type = "forbidden"
+source_modules = ["webchat.models"]
+forbidden_modules = ["webchat.domain", "webchat.adapters", "webchat.entry", "webchat.scripts", "webchat.__main__"]

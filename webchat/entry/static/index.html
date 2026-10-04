@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<title>__ASSISTANT__</title>
+<style>
+  :root { --bg: #f6f5f2; --fg: #22211f; --muted: #6f6c66; --assistant: #ffffff; --you: #dde6f0; --line: #d9d6cf; --accent: #3d5a80; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1b1b1d; --fg: #ecebe8; --muted: #a09d97; --assistant: #262629; --you: #2c3a4b; --line: #3a3a3e; --accent: #8fb3dc; } }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; display: flex; flex-direction: column; height: 100dvh; background: var(--bg); color: var(--fg); font: 17px/1.5 system-ui, sans-serif; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  header h1 { margin: 0; font-size: 1.1rem; font-weight: 600; }
+  button { font: inherit; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--fg); padding: 8px 12px; }
+  button.primary { background: var(--accent); color: var(--bg); border: none; font-weight: 600; }
+  button:disabled { opacity: 0.5; }
+  #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .message { max-width: min(36rem, 85%); padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .assistant { align-self: flex-start; background: var(--assistant); border: 1px solid var(--line); }
+  .user { align-self: flex-end; background: var(--you); }
+  #working { align-self: flex-start; color: var(--muted); font-style: italic; padding: 0 4px; }
+  #start { align-self: center; margin: auto; }
+  #notice { margin: 0; padding: 0 16px; min-height: 0; color: var(--muted); }
+  #notice:not(:empty) { padding: 8px 16px; }
+  form { display: flex; gap: 8px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); }
+  textarea { flex: 1; font: inherit; resize: none; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--assistant); color: var(--fg); max-height: 40dvh; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body data-assistant="__ASSISTANT__">
+<header>
+  <h1>__ASSISTANT__</h1>
+  <button id="new" type="button">New conversation</button>
+</header>
+<main id="messages">
+  <button id="start" class="primary" type="button" hidden>Start a conversation</button>
+  <div id="working" hidden>looking back…</div>
+</main>
+<p id="notice"></p>
+<form id="composer">
+  <textarea id="input" rows="1" placeholder="Talk to __ASSISTANT__" autocomplete="off"></textarea>
+  <button id="send" class="primary" type="submit">Send</button>
+</form>
+<script>
+  const ASSISTANT = document.body.dataset.assistant;
+  const messages = document.getElementById("messages");
+  const working = document.getElementById("working");
+  const start = document.getElementById("start");
+  const notice = document.getElementById("notice");
+  const form = document.getElementById("composer");
+  const input = document.getElementById("input");
+  const send = document.getElementById("send");
+  const newButton = document.getElementById("new");
+  let replying = false;
+
+  function bubble(role, text) {
+    const element = document.createElement("div");
+    element.className = `message ${role}`;
+    element.textContent = text;
+    messages.insertBefore(element, working);
+    messages.scrollTop = messages.scrollHeight;
+    return element;
+  }
+
+  function setReplying(value) {
+    replying = value;
+    send.disabled = value;
+    newButton.disabled = value;
+    start.disabled = value;
+  }
+
+  function showStart(show) {
+    start.hidden = !show;
+    form.hidden = show;
+  }
+
+  function clearMessages() {
+    messages.querySelectorAll(".message").forEach((element) => element.remove());
+  }
+
+  async function load() {
+    const response = await fetch("/api/conversation");
+    if (response.status === 401) { location.reload(); return; }
+    const history = await response.json();
+    clearMessages();
+    history.forEach((message) => bubble(message.role, message.text));
+    showStart(history.length === 0);
+  }
+
+  // Streams one turn; returns true when the assistant finished it.
+  async function stream(url, body) {
+    notice.textContent = "";
+    setReplying(true);
+    let reply = null;
+    let finished = false;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+      if (response.status === 401) { location.reload(); return false; }
+      if (response.status === 409) { notice.textContent = `${ASSISTANT} is still replying.`; return false; }
+      if (!response.ok) { notice.textContent = "Something went wrong. Try again."; return false; }
+      const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+      let buffer = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += value;
+        let boundary;
+        while ((boundary = buffer.indexOf("\n\n")) !== -1) {
+          const chunk = buffer.slice(0, boundary);
+          buffer = buffer.slice(boundary + 2);
+          if (!chunk.startsWith("data: ")) continue;
+          const event = JSON.parse(chunk.slice(6));
+          if (event.kind === "text") {
+            working.hidden = true;
+            reply = reply || bubble("assistant", "");
+            reply.textContent += event.text;
+            messages.scrollTop = messages.scrollHeight;
+          } else if (event.kind === "working") {
+            working.hidden = false;
+            messages.scrollTop = messages.scrollHeight;
+          } else if (event.kind === "done") {
+            finished = true;
+          } else if (event.kind === "error") {
+            if (reply) reply.remove();
+            notice.textContent = event.message;
+            if (event.offer_new_conversation) showStart(true);
+          }
+        }
+      }
+    } catch (error) {
+      notice.textContent = `The connection dropped. Reload to see ${ASSISTANT}'s reply.`;
+    } finally {
+      working.hidden = true;
+      setReplying(false);
+    }
+    return finished;
+  }
+
+  async function startConversation() {
+    clearMessages();
+    showStart(false);
+    if (!(await stream("/api/conversation"))) await load();
+    input.focus();
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const text = input.value.trim();
+    if (!text || replying) return;
+    input.value = "";
+    const mine = bubble("user", text);
+    if (!(await stream("/api/turn", { text }))) {
+      mine.remove();
+      input.value = text;
+    }
+  });
+
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
+
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = `${input.scrollHeight}px`;
+  });
+
+  start.addEventListener("click", startConversation);
+  newButton.addEventListener("click", () => {
+    if (confirm(`Start a new conversation with ${ASSISTANT}?`)) startConversation();
+  });
+
+  load();
+</script>
+</body>
+</html>

@@ -7,6 +7,7 @@
 - To review feedback filed with `fb:`, follow [feedback/REVIEW.md](feedback/REVIEW.md).
 - `memorylayers/data/chatbot/config.json`, when present, overrides the `MemoryConfig` defaults, such as `local_timezone` (an IANA zone name, `UTC` by default) for the dates memory shows.
 - User scripts take no arguments: `uv run python -m memorylayers.scripts.<name>` for `migrate_propose`, `migrate_apply`, `consolidate` and `unstick`. `migrate_propose` moves a legacy flat memory (`memorylayers/data/<parent>.db` and `<parent>.md`) into layered memory and stops when there is none.
+- `webchat` serves a chat page for talking to the assistant from any device on the local network. Set the passphrase with `uv run python -m webchat.scripts.set_passphrase`, then start the server with `uv run python -m webchat` and open `http://<this pc>:8765`. It drives Claude Code headless through the Agent SDK, loading project settings only; its files are under `webchat/data/` (gitignored), its log at `webchat/data/logs/server.log`.
 
 ## Python
 
