@@ -59,8 +59,11 @@
     element.className = `message ${role}`;
     element.textContent = text;
     messages.insertBefore(element, working);
-    messages.scrollTop = messages.scrollHeight;
     return element;
+  }
+
+  function scrollToEnd() {
+    messages.scrollTop = messages.scrollHeight;
   }
 
   function setReplying(value) {
@@ -85,6 +88,7 @@
     const history = await response.json();
     clearMessages();
     history.forEach((message) => bubble(message.role, message.text));
+    scrollToEnd();
     showStart(history.length === 0);
   }
 
@@ -119,10 +123,8 @@
             working.hidden = true;
             reply = reply || bubble("assistant", "");
             reply.textContent += event.text;
-            messages.scrollTop = messages.scrollHeight;
           } else if (event.kind === "working") {
             working.hidden = false;
-            messages.scrollTop = messages.scrollHeight;
           } else if (event.kind === "done") {
             finished = true;
           } else if (event.kind === "error") {
@@ -154,6 +156,7 @@
     if (!text || replying) return;
     input.value = "";
     const mine = bubble("user", text);
+    scrollToEnd();
     if (!(await stream("/api/turn", { text }))) {
       mine.remove();
       input.value = text;
