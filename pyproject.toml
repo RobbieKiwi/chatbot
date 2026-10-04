@@ -19,10 +19,10 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["memorylayers", "freshtopics", "persona"]
+testpaths = ["memorylayers", "freshtopics", "mood", "persona"]
 
 [tool.ty.src]
-include = ["memorylayers", "freshtopics", "persona"]
+include = ["memorylayers", "freshtopics", "mood", "persona"]
 
 [tool.ruff]
 extend-include = ['*.ipynb']
@@ -77,13 +77,13 @@ ban-relative-imports = "all"
 "__init__.py" = ["D104"] # the layer packages are empty markers
 
 [tool.importlinter]
-root_packages = ["memorylayers", "freshtopics", "persona"]
+root_packages = ["memorylayers", "freshtopics", "mood", "persona"]
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "Skill packages are independent"
 type = "independence"
-modules = ["memorylayers", "freshtopics"]
+modules = ["memorylayers", "freshtopics", "mood"]
 
 [[tool.importlinter.contracts]]
 name = "memorylayers layers"
@@ -128,4 +128,15 @@ forbidden_modules = ["persona.domain", "persona.adapters", "persona.entry"]
 name = "persona imports no skill package"
 type = "forbidden"
 source_modules = ["persona"]
-forbidden_modules = ["memorylayers", "freshtopics"]
+forbidden_modules = ["memorylayers", "freshtopics", "mood"]
+
+[[tool.importlinter.contracts]]
+name = "mood layers"
+type = "layers"
+layers = ["mood.entry", "mood.adapters", "mood.domain", "mood.models"]
+
+[[tool.importlinter.contracts]]
+name = "mood models import no functional code"
+type = "forbidden"
+source_modules = ["mood.models"]
+forbidden_modules = ["mood.domain", "mood.adapters", "mood.entry"]
