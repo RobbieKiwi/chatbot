@@ -4,7 +4,7 @@ from string import Template
 
 import pytest
 
-from persona.adapters.files import load_names, persona_dir, save_user_name
+from persona.adapters.files import load_names, persona_dir, read_mood_scales, save_user_name
 from persona.models import PersonaError, PersonaNames
 from persona.tests.conftest import SCALES, write_persona
 
@@ -89,7 +89,40 @@ def test_save_user_name_refuses_a_malformed_local_persona_json(persona_root: Pat
     assert (local / "persona.json").read_text(encoding="utf-8") == "{ not json"
 
 
-def test_the_shipped_default_persona_is_nova_with_no_user(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_read_mood_scales_cuts_the_scale_table(persona_root: Path) -> None:
+    assert read_mood_scales() == SCALES
+
+
+def test_read_mood_scales_reads_the_local_persona(persona_root: Path) -> None:
+    local_scales = "| Scale | 0 | 10 |\n|---|---|---|\n| cheerfulness | Grey | Sunny |"
+    write_persona(folder=persona_root / "local", persona_md=f"# Local\n\n{local_scales}\n")
+    assert read_mood_scales() == local_scales
+
+
+@pytest.mark.parametrize(
+    "persona_md",
+    [
+        "# No table at all\n",
+        "| Feeling | What she does |\n|---|---|\n| cheerfulness | Smiles |\n",
+        "| Scale | 0 | 10 |\n|---|---|---|\n",
+    ],
+)
+def test_a_persona_without_a_scale_table_names_the_file(persona_root: Path, persona_md: str) -> None:
+    write_persona(folder=persona_root / "local", persona_md=persona_md)
+    with pytest.raises(PersonaError, match="mood-scale table") as error:
+        read_mood_scales()
+    assert str(persona_root / "local" / "PERSONA.md") in str(error.value)
+
+
+def test_a_missing_persona_md_names_the_file(persona_root: Path) -> None:
+    (persona_root / "default" / "PERSONA.md").unlink()
+    with pytest.raises(PersonaError, match="missing") as error:
+        read_mood_scales()
+    assert str(persona_root / "default" / "PERSONA.md") in str(error.value)
+
+
+def test_the_shipped_default_persona_is_nova_with_no_user_and_a_scale_table(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("PERSONA_ROOT", raising=False)
     monkeypatch.setattr("persona.adapters.files.local_dir", lambda: Path("no-such-local-persona"))
     assert load_names() == PersonaNames(assistant_name="Nova")
+    assert read_mood_scales().startswith("| Scale |")

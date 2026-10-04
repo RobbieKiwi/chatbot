@@ -10,4 +10,5 @@ class MoodPaths(BaseModel):
     root: Path
     config: Path
     sessions: Path  # one state file per Claude session
+    locks: Path  # one observer lock per session
     logs: Path

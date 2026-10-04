@@ -1,9 +1,10 @@
-"""One mood state file per Claude session."""
+"""One mood state file per Claude session, and the parent's mood config."""
 
 import re
 from pathlib import Path
 
 from mood.adapters.files import read_model, write_model
+from mood.models.config import MoodConfig
 from mood.models.mood import MoodState
 from mood.models.paths import MoodPaths
 
@@ -22,3 +23,7 @@ def load_mood(*, paths: MoodPaths, session_id: str) -> MoodState | None:
 
 def save_mood(*, paths: MoodPaths, session_id: str, state: MoodState) -> None:
     write_model(path=_session_path(paths=paths, session_id=session_id), value=state)
+
+
+def load_config(*, paths: MoodPaths) -> MoodConfig:
+    return read_model(path=paths.config, model=MoodConfig) or MoodConfig()

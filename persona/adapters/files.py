@@ -8,6 +8,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from persona.domain.scales import cut_mood_scales
 from persona.models import PersonaError, PersonaNames
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
@@ -71,3 +72,15 @@ def save_user_name(*, user_name: str) -> PersonaNames:
     names = _read_names(path=path).model_copy(update={"user_name": user_name})
     _write_names(path=path, names=names)
     return names
+
+
+def read_mood_scales() -> str:
+    path = persona_dir() / CHARACTER_FILE
+    try:
+        text = path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        raise PersonaError(f"{path} is missing; copy it from {default_dir() / CHARACTER_FILE}") from None
+    scales = cut_mood_scales(persona_md=text)
+    if scales is None:
+        raise PersonaError(f"{path} has no mood-scale table: a markdown table whose header row starts | Scale |, with a row per scale")
+    return scales

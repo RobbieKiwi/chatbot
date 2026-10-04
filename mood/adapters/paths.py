@@ -1,4 +1,4 @@
-"""Where mood keeps its state and logs."""
+"""Where mood keeps its state, prompts and logs."""
 
 import os
 from pathlib import Path
@@ -7,6 +7,7 @@ from mood.models.paths import MoodPaths
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = PACKAGE_ROOT.parent
+PROMPTS_DIR = PACKAGE_ROOT / "prompts"
 
 
 def data_root() -> Path:
@@ -15,4 +16,4 @@ def data_root() -> Path:
 
 def mood_paths(*, parent: str) -> MoodPaths:
     root = data_root() / parent
-    return MoodPaths(parent=parent, root=root, config=root / "config.json", sessions=root / "sessions", logs=root / "logs")
+    return MoodPaths(parent=parent, root=root, config=root / "config.json", sessions=root / "sessions", locks=root / "locks", logs=root / "logs")

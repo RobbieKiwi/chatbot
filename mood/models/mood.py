@@ -18,6 +18,14 @@ class Axis(StrEnum):
 
 
 Scale = Annotated[float, Field(ge=0, le=10)]
+Nudge = Annotated[float, Field(ge=-3, le=3)]
+
+
+class MoodUpdate(BaseModel):
+    at: datetime
+    deltas: dict[Axis, float]  # as applied, after the clamp
+    presence_delta: float  # as applied, drift included
+    reason: str  # the observer's
 
 
 class MoodState(BaseModel):
@@ -32,6 +40,16 @@ class MoodState(BaseModel):
     presence_base: Scale  # the rolled presence, which presence drifts back towards
     rolled_at: datetime
     updated_at: datetime
+    history: list[MoodUpdate] = Field(default_factory=list)
 
     def value(self, *, axis: Axis) -> float:
         return getattr(self, axis.value)
+
+
+class ObserverReply(BaseModel):
+    """What the observer judged from the last turns. Extra keys are ignored; out-of-range numbers are invalid."""
+
+    deltas: dict[Axis, Nudge] = Field(default_factory=dict)
+    presence_delta: Nudge = 0.0
+    probing: bool = False  # the user is asking about the assistant's feelings or what is on its mind
+    reason: str = ""

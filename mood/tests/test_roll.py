@@ -14,7 +14,7 @@ def test_one_dominant_feeling_per_roll() -> None:
         assert 6 <= state.value(axis=dominant) <= 9
         assert all(0 <= state.value(axis=axis) <= 10 for axis in Axis)
         assert 1 <= state.presence <= 10 and state.presence == state.presence_base
-        assert state.rolled_at == state.updated_at == NOW
+        assert state.rolled_at == state.updated_at == NOW and state.history == []
         dominants.add(dominant)
     assert dominants == set(Axis)
 

@@ -30,6 +30,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.venv/Scripts/python -m mood.entry.stop_hook --parent chatbot",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }
