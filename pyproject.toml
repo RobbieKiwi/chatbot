@@ -19,10 +19,10 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["memorylayers", "freshtopics", "clauderecords", "mood", "persona"]
+testpaths = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "persona"]
 
 [tool.ty.src]
-include = ["memorylayers", "freshtopics", "clauderecords", "mood", "persona"]
+include = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "persona"]
 
 [tool.ruff]
 extend-include = ['*.ipynb']
@@ -77,13 +77,13 @@ ban-relative-imports = "all"
 "__init__.py" = ["D104"] # the layer packages are empty markers
 
 [tool.importlinter]
-root_packages = ["memorylayers", "freshtopics", "clauderecords", "mood", "persona"]
+root_packages = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "persona"]
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "Skill packages are independent"
 type = "independence"
-modules = ["memorylayers", "freshtopics", "mood"]
+modules = ["memorylayers", "freshtopics", "feedback", "mood"]
 
 [[tool.importlinter.contracts]]
 name = "memorylayers layers"
@@ -122,7 +122,7 @@ layers = ["clauderecords.turns", "clauderecords.models"]
 name = "clauderecords imports no skill package"
 type = "forbidden"
 source_modules = ["clauderecords"]
-forbidden_modules = ["memorylayers", "freshtopics", "mood"]
+forbidden_modules = ["memorylayers", "freshtopics", "feedback", "mood"]
 
 [[tool.importlinter.contracts]]
 name = "persona layers"
@@ -139,13 +139,24 @@ forbidden_modules = ["persona.domain", "persona.adapters", "persona.entry"]
 name = "persona imports no skill package and no clauderecords"
 type = "forbidden"
 source_modules = ["persona"]
-forbidden_modules = ["memorylayers", "freshtopics", "mood", "clauderecords"]
+forbidden_modules = ["memorylayers", "freshtopics", "feedback", "mood", "clauderecords"]
 
 [[tool.importlinter.contracts]]
 name = "memorylayers and freshtopics keep their own transcript readers"
 type = "forbidden"
 source_modules = ["memorylayers", "freshtopics"]
 forbidden_modules = ["clauderecords"]
+
+[[tool.importlinter.contracts]]
+name = "feedback layers"
+type = "layers"
+layers = ["feedback.entry", "feedback.adapters", "feedback.domain", "feedback.models"]
+
+[[tool.importlinter.contracts]]
+name = "feedback models import no functional code"
+type = "forbidden"
+source_modules = ["feedback.models"]
+forbidden_modules = ["feedback.domain", "feedback.adapters", "feedback.entry"]
 
 [[tool.importlinter.contracts]]
 name = "mood layers"
