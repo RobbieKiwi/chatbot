@@ -37,5 +37,6 @@ def apply_reply(*, state: MoodState, reply: ObserverReply, config: MoodConfig, n
         gap = state.presence_base - presence
         presence += math.copysign(min(abs(gap), minutes * config.presence_drift_per_minute), gap)
 
+    thoughts = state.thoughts if reply.thoughts is None else [thought.strip() for thought in reply.thoughts if thought.strip()][: config.thoughts_limit]
     update = MoodUpdate(at=now, deltas=applied, presence_delta=presence - state.presence, reason=reply.reason)
-    return state.model_copy(update={**values, "presence": _clip(value=presence), "updated_at": now, "history": [*state.history, update][-config.history_limit :]})
+    return state.model_copy(update={**values, "presence": _clip(value=presence), "updated_at": now, "thoughts": thoughts, "history": [*state.history, update][-config.history_limit :]})

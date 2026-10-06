@@ -168,3 +168,9 @@ def test_locks_are_exclusive_until_stale(tmp_path: Path) -> None:
     assert try_lock(path=lock, now=NOW, stale_after=timedelta(minutes=5))
     assert not try_lock(path=lock, now=NOW, stale_after=timedelta(minutes=5))
     assert try_lock(path=lock, now=NOW + timedelta(hours=1), stale_after=timedelta(minutes=5))
+
+
+def test_the_brief_holds_her_thoughts() -> None:
+    assert "(none yet)" in build_observer_brief(template=_template(), state=mood_state(), turns="", names=NAMES, scales=SCALES)
+    state = mood_state().model_copy(update={"thoughts": ["They owe me the camping story."]})
+    assert "- They owe me the camping story." in build_observer_brief(template=_template(), state=state, turns="", names=NAMES, scales=SCALES)

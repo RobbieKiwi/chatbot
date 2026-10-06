@@ -1,4 +1,4 @@
-"""The mood the assistant reads on every message, the cue that turns it into action, and the report a person reads."""
+"""The mood and private thoughts the assistant reads on every message, the cue that turns them into action, and the report a person reads."""
 
 from mood.models.mood import Axis, MoodState
 
@@ -22,9 +22,14 @@ def render_mood_cue(*, state: MoodState) -> str:
     return f"Strongest now: {pulls}. Let them decide what you do and where the conversation goes in this reply. Show them; never list your feelings."
 
 
+def render_thoughts(*, state: MoodState) -> str:
+    return "<thoughts>\n" + "\n".join(f"- {thought}" for thought in state.thoughts) + "\n</thoughts>" if state.thoughts else ""
+
+
 def render_for_assistant(*, state: MoodState) -> str:
-    """What the assistant reads on every message: the mood and the cue to act on it."""
-    return "\n".join((render_mood(state=state), render_mood_cue(state=state)))
+    """What the assistant reads on every message: the mood, its private thoughts, and the cue to act on both."""
+    cue = render_mood_cue(state=state) + (" Your thoughts are private: act on them, never quote them." if state.thoughts else "")
+    return "\n".join(part for part in (render_mood(state=state), render_thoughts(state=state), cue) if part)
 
 
 def render_mood_report(*, session_id: str, state: MoodState, history_count: int) -> str:

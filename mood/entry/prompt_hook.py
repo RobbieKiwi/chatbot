@@ -1,4 +1,4 @@
-"""UserPromptSubmit hook: rolls the assistant's mood when a conversation starts and shows it on every message."""
+"""UserPromptSubmit hook: rolls the assistant's mood when a conversation starts and shows it, with its private thoughts, on every message."""
 
 import argparse
 import random

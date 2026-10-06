@@ -5,7 +5,7 @@ from string import Template
 
 from pydantic import ValidationError
 
-from mood.domain.render import render_mood
+from mood.domain.render import render_mood, render_thoughts
 from mood.models.mood import MoodState, ObserverReply
 from persona.domain.names import user_label
 from persona.models import PersonaNames
@@ -19,6 +19,7 @@ def build_observer_brief(*, template: str, state: MoodState, turns: str, names: 
     """`scales` is the persona's mood-scale table, which the observer judges the turns against."""
     return Template(template).substitute(
         mood=render_mood(state=state),
+        thoughts=render_thoughts(state=state) or "(none yet)",
         turns=turns,
         scales=scales,
         user=user_label(names=names),

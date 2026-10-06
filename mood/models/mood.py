@@ -41,6 +41,7 @@ class MoodState(BaseModel):
     rolled_at: datetime
     updated_at: datetime
     history: list[MoodUpdate] = Field(default_factory=list)
+    thoughts: list[str] = Field(default_factory=list)  # the assistant's private inner monologue in its own voice: what is on its mind, what it wants next, what it is holding back
 
     def value(self, *, axis: Axis) -> float:
         return getattr(self, axis.value)
@@ -53,3 +54,4 @@ class ObserverReply(BaseModel):
     presence_delta: Nudge = 0.0
     probing: bool = False  # the user is asking about the assistant's feelings or what is on its mind
     reason: str = ""
+    thoughts: list[str] | None = None  # the rewritten private thoughts; None keeps the current ones

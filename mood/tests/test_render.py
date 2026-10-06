@@ -1,4 +1,4 @@
-from mood.domain.render import render_mood, render_mood_cue, render_mood_report, strongest_axes
+from mood.domain.render import render_for_assistant, render_mood, render_mood_cue, render_mood_report, strongest_axes
 from mood.models.mood import Axis, MoodUpdate
 from mood.tests.conftest import NOW, mood_state
 
@@ -22,3 +22,14 @@ def test_the_report_lists_the_latest_nudges_with_their_reasons() -> None:
     report = render_mood_report(session_id="s1", state=mood_state(irritation=8).model_copy(update={"history": [nudge, nudge]}), history_count=1)
     assert report.splitlines()[-1] == "  20:00  he dodged the question  (irritation +0.5; presence -0.2)"
     assert report.count("he dodged") == 1
+
+
+def test_assistant_reads_her_thoughts_between_the_mood_and_the_cue() -> None:
+    state = mood_state(irritation=8).model_copy(update={"thoughts": ["He owes me the mushroom story."]})
+    block, *thoughts, cue = render_for_assistant(state=state).splitlines()
+    assert block.startswith("<mood ") and thoughts == ["<thoughts>", "- He owes me the mushroom story.", "</thoughts>"]
+    assert cue.endswith("Your thoughts are private: act on them, never quote them.")
+
+
+def test_without_thoughts_assistant_reads_the_mood_and_the_cue() -> None:
+    assert len(render_for_assistant(state=mood_state(irritation=8)).splitlines()) == 2

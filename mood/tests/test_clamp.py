@@ -69,3 +69,14 @@ def test_a_clock_running_backwards_moves_nothing() -> None:
     before = mood_state(playfulness=4, presence=8, presence_base=3)
     after = apply_reply(state=before, reply=ObserverReply(deltas={Axis.PLAYFULNESS: 3}, presence_delta=3), config=CONFIG, now=NOW - timedelta(minutes=5))
     assert (after.playfulness, after.presence) == (4, 8)
+
+
+def test_thoughts_are_rewritten_trimmed_and_capped() -> None:
+    before = mood_state().model_copy(update={"thoughts": ["old"]})
+    reply = ObserverReply(thoughts=[" one ", "", "two", "three", "four"])
+    assert apply_reply(state=before, reply=reply, config=CONFIG, now=_after(minutes=1)).thoughts == ["one", "two", "three"]
+
+
+def test_a_reply_without_thoughts_keeps_hers() -> None:
+    before = mood_state().model_copy(update={"thoughts": ["old"]})
+    assert apply_reply(state=before, reply=ObserverReply(), config=CONFIG, now=_after(minutes=1)).thoughts == ["old"]
