@@ -25,5 +25,10 @@ def save_mood(*, paths: MoodPaths, session_id: str, state: MoodState) -> None:
     write_model(path=_session_path(paths=paths, session_id=session_id), value=state)
 
 
+def latest_session_id(*, paths: MoodPaths) -> str | None:
+    files = sorted(paths.sessions.glob("*.json"), key=lambda path: path.stat().st_mtime) if paths.sessions.is_dir() else []
+    return files[-1].stem if files else None
+
+
 def load_config(*, paths: MoodPaths) -> MoodConfig:
     return read_model(path=paths.config, model=MoodConfig) or MoodConfig()

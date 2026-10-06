@@ -21,7 +21,8 @@ def test_registration_rolls_a_fresh_mood_and_shows_it(data_root: Path, prompt: s
     output = handle_prompt(payload=_payload(prompt=prompt), paths=paths, now=NOW, rng=random.Random(4))
     state = load_mood(paths=paths, session_id="s1")
     assert state is not None and state.rolled_at == NOW
-    assert output.startswith('<mood presence="') and output.endswith("</mood>")
+    block, cue = output.split("\n")
+    assert block.startswith('<mood presence="') and block.endswith("</mood>") and cue.startswith("Strongest now: ")
 
 
 def test_later_messages_carry_the_mood(data_root: Path) -> None:
@@ -39,7 +40,7 @@ def test_a_second_registration_rerolls(data_root: Path) -> None:
     save_mood(paths=paths, session_id="s1", state=mood_state(melancholy=7))
     handle_prompt(payload=_payload(prompt="/pk"), paths=paths, now=NOW, rng=random.Random(4))
     state = load_mood(paths=paths, session_id="s1")
-    assert state is not None and state != mood_state(melancholy=7)
+    assert state is not None and state.history == [] and state != mood_state(melancholy=7)
 
 
 def test_unsafe_session_ids_are_refused(data_root: Path) -> None:

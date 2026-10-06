@@ -8,7 +8,7 @@ from random import Random
 
 from mood.adapters.paths import mood_paths
 from mood.adapters.sessions import load_mood, save_mood
-from mood.domain.render import render_mood
+from mood.domain.render import render_for_assistant
 from mood.domain.roll import roll_mood
 from mood.entry.common import HookPayload, is_registration_prompt, log_exception
 from mood.models.paths import MoodPaths
@@ -18,9 +18,9 @@ def handle_prompt(*, payload: HookPayload, paths: MoodPaths, now: datetime, rng:
     if is_registration_prompt(prompt=payload.prompt, parent=paths.parent):
         state = roll_mood(rng=rng, now=now)
         save_mood(paths=paths, session_id=payload.session_id, state=state)
-        return render_mood(state=state)
+        return render_for_assistant(state=state)
     state = load_mood(paths=paths, session_id=payload.session_id)
-    return render_mood(state=state) if state else ""
+    return render_for_assistant(state=state) if state else ""
 
 
 def main(*, argv: list[str], stdin_bytes: bytes) -> str:
