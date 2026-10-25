@@ -9,7 +9,7 @@ import uvicorn
 
 from persona.adapters.files import load_names
 from persona.models import PersonaError
-from webchat.adapters.assistant import AssistantDriver
+from webchat.adapters.assistant import AssistantDriver, project_trusted
 from webchat.adapters.files import PROJECT_ROOT, read_config, webchat_paths
 from webchat.entry.app import create_app
 from webchat.entry.turns import TurnRunner
@@ -24,6 +24,8 @@ def serve() -> None:
         assistant_name = load_names().assistant_name
     except PersonaError as error:
         sys.exit(str(error))
+    if not project_trusted(project_root=PROJECT_ROOT):
+        sys.exit(f"Claude Code does not trust {PROJECT_ROOT}, so it would ignore the chatbot's permissions. Run claude in the project directoy once and accept the trust dialog then reload the terminal")
     paths.logs.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(filename=paths.logs / "server.log", level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s", encoding="utf-8")
     turns = TurnRunner(driver=AssistantDriver(paths=paths, project_root=PROJECT_ROOT, assistant_name=assistant_name), paths=paths)

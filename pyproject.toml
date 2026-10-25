@@ -23,7 +23,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "folderaccess", "webchat", "persona"]
+testpaths = ["memorylayers/tests", "freshtopics/tests", "clauderecords/tests", "feedback/tests", "mood/tests", "folderaccess/tests", "webchat/tests", "persona/tests"]
 
 [tool.ty.src]
 include = ["memorylayers", "freshtopics", "clauderecords", "feedback", "mood", "folderaccess", "webchat", "persona"]

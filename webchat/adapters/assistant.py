@@ -6,7 +6,9 @@ life and requests reach that task through a queue.
 """
 
 import asyncio
+import json
 import logging
+import os
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -40,6 +42,21 @@ class SdkClient(Protocol):
 
 class ClientFactory(Protocol):
     def __call__(self, *, options: ClaudeAgentOptions) -> SdkClient: ...
+
+
+def _claude_config_file() -> Path:
+    config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
+    return Path(config_dir) / ".claude.json" if config_dir else Path.home() / ".claude.json"
+
+
+def project_trusted(*, project_root: Path) -> bool:
+    """Whether Claude Code has accepted its trust dialog for the project or a folder above it; untrusted, it ignores the project's allow-list."""
+    config_file = _claude_config_file()
+    if not config_file.exists():
+        return False
+    projects = json.loads(config_file.read_text(encoding="utf-8")).get("projects", {})
+    trusted = {os.path.normcase(Path(folder)) for folder, project in projects.items() if project.get("hasTrustDialogAccepted")}
+    return any(os.path.normcase(folder) in trusted for folder in [project_root, *project_root.parents])
 
 
 def assistant_options(*, project_root: Path, resume: str | None) -> ClaudeAgentOptions:

@@ -1,3 +1,4 @@
+import json
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from pathlib import Path
@@ -5,7 +6,7 @@ from pathlib import Path
 import pytest
 from claude_agent_sdk import ClaudeAgentOptions
 
-from webchat.adapters.assistant import NO_CONVERSATION, OPENING_PROMPT, RESUME_FAILED, AssistantDriver
+from webchat.adapters.assistant import NO_CONVERSATION, OPENING_PROMPT, RESUME_FAILED, AssistantDriver, project_trusted
 from webchat.adapters.files import read_state, write_state
 from webchat.models.chat import ChatEvent, TextDelta, TurnDone, TurnError
 from webchat.models.paths import WebchatPaths
@@ -170,3 +171,28 @@ async def test_close_disconnects_the_live_client(paths: WebchatPaths) -> None:
     await collect(driver.start_conversation())
     await driver.close()
     assert clients.made[0].disconnected
+
+
+def _claude_config(*, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, projects: dict[str, object]) -> None:
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(tmp_path))
+    (tmp_path / ".claude.json").write_text(json.dumps({"projects": projects}), encoding="utf-8")
+
+
+def test_a_project_with_its_trust_dialog_accepted_is_trusted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _claude_config(tmp_path=tmp_path, monkeypatch=monkeypatch, projects={"C:/project": {"hasTrustDialogAccepted": True}})
+    assert project_trusted(project_root=PROJECT)
+
+
+def test_trust_in_a_parent_folder_covers_the_project(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _claude_config(tmp_path=tmp_path, monkeypatch=monkeypatch, projects={"C:/": {"hasTrustDialogAccepted": True}})
+    assert project_trusted(project_root=PROJECT)
+
+
+def test_a_project_without_accepted_trust_is_untrusted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _claude_config(tmp_path=tmp_path, monkeypatch=monkeypatch, projects={"C:/project": {"hasTrustDialogAccepted": False}, "C:/other": {"hasTrustDialogAccepted": True}})
+    assert not project_trusted(project_root=PROJECT)
+
+
+def test_a_missing_claude_config_is_untrusted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(tmp_path))
+    assert not project_trusted(project_root=PROJECT)
