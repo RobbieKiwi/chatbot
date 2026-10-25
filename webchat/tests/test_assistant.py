@@ -71,7 +71,7 @@ async def test_start_opens_chatbot_and_saves_the_session(paths: WebchatPaths) ->
     (client,) = clients.made
     assert client.prompts == [OPENING_PROMPT]
     assert client.options.resume is None
-    assert client.options.setting_sources == ["project"]
+    assert client.options.setting_sources == ["project", "local"]
     assert client.options.permission_mode == "dontAsk"
     assert client.options.include_partial_messages is True
     assert client.options.cwd == PROJECT

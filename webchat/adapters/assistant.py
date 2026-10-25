@@ -45,7 +45,7 @@ class ClientFactory(Protocol):
 def assistant_options(*, project_root: Path, resume: str | None) -> ClaudeAgentOptions:
     return ClaudeAgentOptions(
         cwd=project_root,
-        setting_sources=["project"],  # the chatbot hooks, allow-list, skill and librarian; not the user's own coding settings
+        setting_sources=["project", "local"],  # the chatbot hooks, allow-list, skill and librarian, and the folder grants in settings.local.json; not the user's own coding settings
         permission_mode="dontAsk",
         include_partial_messages=True,
         resume=resume,
