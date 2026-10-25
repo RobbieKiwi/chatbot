@@ -33,6 +33,7 @@ project.
 - [Claude Code](https://claude.com/claude-code), signed in
 - [uv](https://docs.astral.sh/uv/)
 - Python 3.13 (uv installs it if needed)
+- Windows: the hooks, skill and agents run `.venv/Scripts/python`, and folder access expects drive-letter paths
 
 ## Setup
 
