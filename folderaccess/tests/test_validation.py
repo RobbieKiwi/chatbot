@@ -78,3 +78,19 @@ def test_a_symlink_to_the_project_is_refused(layout: tuple[Path, Path]) -> None:
     except OSError:
         pytest.skip("symlinks need privilege on this machine")
     _refused(path=link, layout=layout, reason="contains the project")
+
+
+@pytest.mark.parametrize("relative", [".claude", ".claude/skills", ".ssh", "AppData", "AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"])
+def test_folders_that_hold_settings_credentials_or_startup_programs_are_refused(layout: tuple[Path, Path], relative: str) -> None:
+    folder = layout[1] / relative
+    folder.mkdir(parents=True, exist_ok=True)
+    _refused(path=folder, layout=layout, reason="protected")
+
+
+def test_a_folder_containing_a_protected_folder_is_refused(tmp_path: Path) -> None:
+    home = tmp_path / "users" / "alex"
+    project_root = tmp_path / "work" / "project"
+    for folder in (home / ".claude", project_root):
+        folder.mkdir(parents=True)
+    with pytest.raises(ValueError, match="protected"):
+        validate(path=tmp_path / "users", project_root=project_root, home=home)
