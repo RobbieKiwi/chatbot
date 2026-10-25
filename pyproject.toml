@@ -176,13 +176,13 @@ forbidden_modules = ["mood.domain", "mood.adapters", "mood.entry"]
 [[tool.importlinter.contracts]]
 name = "folderaccess layers"
 type = "layers"
-layers = ["folderaccess.domain", "folderaccess.models"]
+layers = ["folderaccess.__main__", "folderaccess.entry", "folderaccess.adapters", "folderaccess.domain", "folderaccess.models"]
 
 [[tool.importlinter.contracts]]
 name = "folderaccess models import no functional code"
 type = "forbidden"
 source_modules = ["folderaccess.models"]
-forbidden_modules = ["folderaccess.domain"]
+forbidden_modules = ["folderaccess.domain", "folderaccess.adapters", "folderaccess.entry"]
 
 [[tool.importlinter.contracts]]
 name = "webchat layers"
