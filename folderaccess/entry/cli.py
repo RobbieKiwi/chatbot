@@ -6,7 +6,7 @@ from pathlib import Path
 
 from folderaccess.adapters import paths
 from folderaccess.adapters.settings import read_settings, write_settings
-from folderaccess.adapters.store import read_list, write_list
+from folderaccess.adapters.store import read_list, read_synced, write_list, write_synced
 from folderaccess.domain.listing import normalise_path, remove, upsert
 from folderaccess.domain.permissions import merge, to_permissions
 from folderaccess.domain.validation import validate
@@ -17,9 +17,11 @@ NEW_CONVERSATION = "Takes effect in a new conversation."
 
 def _save(*, entries: list[FolderAccess]) -> None:
     """Write the list and the settings built from it, once both are known to be good."""
-    settings = merge(settings=read_settings(), permissions=to_permissions(entries=entries))
+    permissions = to_permissions(entries=entries)
+    settings = merge(settings=read_settings(), permissions=permissions, previous=read_synced())
     write_list(entries=entries)
     write_settings(settings=settings)
+    write_synced(permissions=permissions)
 
 
 def _validate(*, path: Path) -> None:

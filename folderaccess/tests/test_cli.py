@@ -51,7 +51,7 @@ def test_add_keeps_everything_else_in_the_local_settings(layout: Layout, capsys:
     drafts = layout.home / "drafts"
     _run(["add", str(drafts), "--access", "edit"], capsys)
     settings = _settings(layout)
-    assert settings["permissions"]["allow"] == ["Bash(git status)", "Glob(./notes/**)", f"Read({_rule(drafts)})", f"Edit({_rule(drafts)})"]
+    assert settings["permissions"]["allow"] == ["Bash(git status)", "Read(./notes/**)", "Glob(./notes/**)", f"Read({_rule(drafts)})", f"Edit({_rule(drafts)})"]
     assert settings["permissions"]["additionalDirectories"] == [_slash(drafts)]
     assert list(settings) == ["permissions", "hooks"]
     assert settings["hooks"]["Stop"][0]["hooks"][0]["command"] == "stop"
@@ -148,3 +148,17 @@ def test_sync_names_the_local_settings(layout: Layout, capsys: pytest.CaptureFix
     code, out, _ = _run(["sync"], capsys)
     assert code == 0 and str(layout.settings_path) in out
     assert layout.settings_path.exists()
+
+
+def test_rules_the_user_approved_survive_add_and_remove(layout: Layout, capsys: pytest.CaptureFixture[str]) -> None:
+    approved = {"permissions": {"allow": ["Read(//c/approved/**)"], "additionalDirectories": ["C:/approved"]}}
+    layout.settings_path.parent.mkdir(parents=True, exist_ok=True)
+    layout.settings_path.write_text(json.dumps(approved) + "\n", encoding="utf-8")
+    drafts = layout.home / "drafts"
+    _run(["add", str(drafts), "--access", "read"], capsys)
+    assert _settings(layout)["permissions"] == {
+        "allow": ["Read(//c/approved/**)", f"Read({_rule(drafts)})"],
+        "additionalDirectories": ["C:/approved", _slash(drafts)],
+    }
+    _run(["remove", str(drafts)], capsys)
+    assert _settings(layout)["permissions"] == approved["permissions"]

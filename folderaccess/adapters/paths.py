@@ -15,6 +15,11 @@ def list_path() -> Path:
     return data_root() / "folders.txt"
 
 
+def synced_path() -> Path:
+    """The permissions the last sync wrote, so the next one replaces exactly those."""
+    return data_root() / "synced.json"
+
+
 def settings_path() -> Path:
     """The user's own, gitignored settings; the committed settings.json is never written."""
     return PROJECT_ROOT / ".claude" / "settings.local.json"
