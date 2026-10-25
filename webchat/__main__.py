@@ -3,6 +3,7 @@
 import logging
 import socket
 import sys
+import webbrowser
 
 import uvicorn
 
@@ -29,6 +30,7 @@ def serve() -> None:
     url = f"http://{socket.gethostname()}:{config.port}"
     print(f"{assistant_name} is at {url} (Ctrl+C to stop)")
     # No reload or workers: they switch Windows to a selector event loop, which cannot start the Claude Code subprocess.
+    webbrowser.open(url=url)
     uvicorn.run(app=create_app(paths=paths, turns=turns, assistant_name=assistant_name), host="0.0.0.0", port=config.port, log_config=None)
 
 

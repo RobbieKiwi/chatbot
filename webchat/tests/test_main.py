@@ -15,6 +15,7 @@ def test_serve_with_a_broken_persona_stops_naming_the_file(paths: WebchatPaths, 
     local.mkdir()
     (local / "persona.json").write_text("{ not json", encoding="utf-8")
     monkeypatch.setattr(webchat.__main__.uvicorn, "run", lambda **kwargs: pytest.fail("served without a persona"))
+    monkeypatch.setattr(webchat.__main__.webbrowser, "open", lambda **kwargs: pytest.fail("opened a browser without a persona"))
     with pytest.raises(SystemExit) as stop:
         webchat.__main__.serve()
     assert str(local / "persona.json") in str(stop.value)
