@@ -13,7 +13,10 @@
       "Bash(.venv/Scripts/python -m freshtopics context:*)",
       "Bash(.venv/Scripts/python -m freshtopics seeds:*)",
       "Bash(.venv/Scripts/python -m persona show:*)",
-      "Bash(.venv/Scripts/python -m persona set-user:*)"
+      "Bash(.venv/Scripts/python -m persona set-user:*)",
+      "Bash(.venv/Scripts/python -m folderaccess list:*)",
+      "Bash(.venv/Scripts/python -m folderaccess add:*)",
+      "Bash(.venv/Scripts/python -m folderaccess remove:*)"
     ]
   },
   "hooks": {
